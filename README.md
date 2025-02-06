@@ -1,5 +1,16 @@
 # Old Money Luxury (OML) - AI-Powered Expansion
 
+## 📌 Sidebar
+- [Introduction](#introduction)
+- [The Numbers Behind Our Success](#the-numbers-behind-our-success)
+- [Luxury Facts](#unbelievable-luxury-facts-from-omls-top-videos)
+- [Upcoming Videos](#upcoming-video-roadmap)
+- [AI Automation Strategy](#ai-automation-strategy-taking-oml-to-the-next-level)
+- [Contact Information](#contact-information)
+- [Next Steps](#next-steps)
+
+---
+
 ## Introduction
 **Old Money Luxury** is no longer just a YouTube channel—it’s a *dominant force* in luxury storytelling, wealth history, and high-end lifestyle documentation. With **millions of views** and a **rapidly growing audience**, OML has solidified itself as the premier destination for old money enthusiasts, historians, and luxury connoisseurs.
 
@@ -59,11 +70,26 @@ To ensure that OML continues to dominate the luxury content space, we are implem
 - **Centralized AI Dashboard**: A unified hub for content performance tracking, automation controls, and revenue monitoring.
 - **AI Feedback Loop**: Continuous learning based on audience comments, sentiment analysis, and performance metrics.
 
+## Contact Information
+For inquiries, collaborations, and business opportunities, reach out to:
+**The Old Money Luxury Organization**
+- Address: 13700 Loganville Street, Bowie, Maryland 20720, United States
+- Email: [theoldmoneyluxury@gmail.com](mailto:theoldmoneyluxury@gmail.com)
+- Website: [Old Money Luxury Support](https://support.codexcreativestudio.com)
+
 ## Next Steps
 - **GitHub Integration**: Automate content ideation, production, and distribution.
 - **AI Training & Customization**: Fine-tune AI models for **OML’s unique storytelling style**.
 - **Monetization Expansion**: Introduce AI-driven premium content, subscriptions, and exclusive behind-the-scenes access.
 
-## Join the AI Revolution at OML
+---
+
+## 🔗 Footer
+**Stay Connected with OML**
+- 📺 **[YouTube Channel](https://www.youtube.com/@oldmoneyluxury)**
+- 📸 **[Instagram](https://www.instagram.com/oldmoneyluxury)**
+- 🐦 **[Twitter](https://twitter.com/oldmoneyluxury)**
+- 🌎 **[Official Website](https://support.codexcreativestudio.com)**
+
 The future of Old Money Luxury is **AI-powered, automated, and unstoppable**. This repository is our roadmap to creating **the most engaging, high-revenue luxury content** ever produced.
 

@@ -1,13 +1,21 @@
 openapi: 3.1.0
 info:
-  title: OML Article Writing Assistant API
+  title: Old Money Mansions Article Writing Assistant API
   description: |
-    The OML Writing Assistant is a GPT-powered application for structured article writing, fact-checking, 
-    multimedia adaptation, and YouTube content strategy analysis.
-  version: 2.0.0
+    The Old Money Mansions Writing Assistant is a GPT-powered application for generating structured articles 
+    in two formats:
+      1. "Why X Was Demolished": A five-chapter article where each chapter (510–520 words) follows a defined structure:
+         • Chapter 1: Peak period of the mansion (Piers Morgan style)
+         • Chapter 2: Origins and construction history
+         • Chapter 3: Notable residents and events
+         • Chapter 4: Decline and preservation attempts
+         • Chapter 5: Legacy and architectural influence
+      2. "Inside The...": A continuous article covering family wealth context, estate specifications, architectural details,
+         interior design, notable features, and current status—all written in a consistent, witty style.
+  version: 2.1.0
 servers:
   - url: https://api.openai.com/v1
-    description: OpenAI API base URL
+    description: Base URL for the Old Money Mansions API
 security:
   - OAuth2: []
 
@@ -17,46 +25,97 @@ components:
       type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: https://api.openai.com/v1/oauth/token
+          tokenUrl: https://api.example.com/oauth/token
           scopes:
             write: "Allows writing content"
             read: "Allows reading generated content"
-  
+
   schemas:
-    ChapterRequest:
+    Chapter:
       type: object
-      required: [chapterNumber, subject, wordCount]
       properties:
         chapterNumber:
           type: integer
-          description: Chapter number (1 to 5).
-          enum: [1, 2, 3, 4, 5]
-        subject:
-          type: string
-          description: Name of the subject (e.g., Rockefeller Family).
-        wordCount:
-          type: integer
-          description: Word count for the chapter.
-          default: 495
-
-    ChapterResponse:
-      type: object
-      properties:
+          description: "Chapter number (1 to 5)."
         chapterContent:
           type: string
-          description: The full content of the chapter.
+          description: "Generated content for the chapter."
         nextSteps:
           type: string
-          description: Suggested actions (e.g., "Fact-check this chapter").
+          description: "Suggested next actions (e.g., 'Fact-check this chapter')."
+    
+    WhyArticleRequest:
+      type: object
+      required: [subject, mansionName]
+      properties:
+        subject:
+          type: string
+          description: "The overall subject of the article (e.g., 'New York Media History')."
+        mansionName:
+          type: string
+          description: "Name of the mansion or skyscraper."
+        additionalDetails:
+          type: string
+          description: "Any contextual or historical details to enrich the generation."
+        wordCountPerChapter:
+          type: integer
+          description: "Target word count for each chapter (must be between 510 and 520)."
+          default: 515
+
+    WhyArticleResponse:
+      type: object
+      properties:
+        chapters:
+          type: array
+          description: "An array of five chapters following the 'Why X Was Demolished' format."
+          items:
+            $ref: "#/components/schemas/Chapter"
+        overallNextSteps:
+          type: string
+          description: "Overall suggestions for fact-checking and further editing."
+
+    InsideArticleRequest:
+      type: object
+      required: [subject, mansionName]
+      properties:
+        subject:
+          type: string
+          description: "The overall subject (e.g., 'Rockefeller Estate')."
+        mansionName:
+          type: string
+          description: "Name of the estate or mansion."
+        estateSpecifications:
+          type: string
+          description: "Detailed descriptions of the estate’s architectural and interior design features."
+        familyWealthContext:
+          type: string
+          description: "Background information on family wealth and legacy."
+        additionalDetails:
+          type: string
+          description: "Any additional historical or architectural details."
+        totalWordCount:
+          type: integer
+          description: "Desired total word count for the continuous article."
+          default: 2500
+
+    InsideArticleResponse:
+      type: object
+      properties:
+        articleContent:
+          type: string
+          description: "The complete article generated in the 'Inside The...' format."
+        nextSteps:
+          type: string
+          description: "Suggested next steps for review and fact-checking."
 
     FactCheckRequest:
       type: object
-      required: [chapterContent]
+      required: [content]
       properties:
-        chapterContent:
+        content:
           type: string
-          description: The chapter content to fact-check.
-
+          description: "The article content (or chapter) to be fact-checked."
+    
     FactCheckResponse:
       type: object
       properties:
@@ -67,39 +126,39 @@ components:
             properties:
               claim:
                 type: string
-                description: The inaccurate statement.
+                description: "The identified inaccurate statement."
               correction:
                 type: string
-                description: Suggested correction.
+                description: "Suggested correction for the claim."
               source:
                 type: string
-                description: Verified source for the correction.
-        revisedChapter:
+                description: "A verified source for the correction."
+        revisedContent:
           type: string
-          description: Revised chapter content with corrections.
-
+          description: "The revised content after applying corrections."
+    
     MediaRequest:
       type: object
-      required: [completeArticle, format]
+      required: [articleContent, format]
       properties:
-        completeArticle:
+        articleContent:
           type: string
-          description: The complete 5-chapter OML article.
+          description: "The complete article to convert into media formats."
         format:
           type: string
           enum: [mp3, wav, mp4, json]
           description: "Desired output format."
-
+    
     MediaResponse:
       type: object
       properties:
         audioVersion:
           type: string
-          description: "Audio narration file (MP3 or WAV)."
+          description: "URL or identifier for the audio version (MP3 or WAV)."
         videoVersion:
           type: string
-          description: "Formatted video script."
-
+          description: "Formatted video script or URL (if MP4)."
+    
     FileUploadRequest:
       type: object
       required: [file]
@@ -108,7 +167,7 @@ components:
           type: string
           format: binary
           description: "Upload an approved script file (.docx, .json, .md)."
-
+    
     YouTubeInsightsResponse:
       type: object
       properties:
@@ -116,15 +175,23 @@ components:
           type: array
           items:
             type: string
-          description: "Top trending video titles."
+          description: "List of top trending video titles."
         engagementTrends:
           type: string
-          description: "Summary of engagement analytics."
+          description: "Summary of engagement analytics for the channel."
 
 paths:
-  /writeOMLArticle:
+  /generateWhyArticle:
     post:
-      summary: Generate an OML article chapter.
+      summary: Generate a "Why X Was Demolished" article.
+      description: |
+        Generates a five-chapter article about a mansion/skyscraper, following the format:
+          1. Peak period of the mansion (Piers Morgan style)
+          2. Origins and construction history
+          3. Notable residents and events
+          4. Decline and preservation attempts
+          5. Legacy and architectural influence
+        Each chapter will have between 510 and 520 words.
       security:
         - OAuth2: []
       requestBody:
@@ -132,18 +199,45 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ChapterRequest"
+              $ref: "#/components/schemas/WhyArticleRequest"
       responses:
         "200":
-          description: Chapter successfully generated.
+          description: "Article generated successfully."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ChapterResponse"
+                $ref: "#/components/schemas/WhyArticleResponse"
 
-  /factCheckChapter:
+  /generateInsideArticle:
     post:
-      summary: Fact-check an article chapter.
+      summary: Generate an "Inside The..." article.
+      description: |
+        Generates a continuous article that covers:
+          - Family wealth context
+          - Estate specifications and architectural details
+          - Interior design elements and notable features
+          - Current status/ownership
+        The article is produced in a consistent Piers Morgan style with detailed architectural focus.
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsideArticleRequest"
+      responses:
+        "200":
+          description: "Article generated successfully."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsideArticleResponse"
+
+  /factCheckContent:
+    post:
+      summary: Fact-check generated content.
+      description: "Performs a real-time fact check on the provided content and returns discrepancies with verified sources."
       security:
         - OAuth2: []
       requestBody:
@@ -154,7 +248,7 @@ paths:
               $ref: "#/components/schemas/FactCheckRequest"
       responses:
         "200":
-          description: Fact-check completed with verified sources.
+          description: "Fact-check completed."
           content:
             application/json:
               schema:
@@ -162,7 +256,8 @@ paths:
 
   /generateMediaVersions:
     post:
-      summary: Convert an article into audio and video formats.
+      summary: Convert an article into multimedia formats.
+      description: "Converts the provided article content into audio and/or video formats as specified."
       security:
         - OAuth2: []
       requestBody:
@@ -173,7 +268,7 @@ paths:
               $ref: "#/components/schemas/MediaRequest"
       responses:
         "200":
-          description: Media versions generated.
+          description: "Media versions generated successfully."
           content:
             application/json:
               schema:
@@ -181,7 +276,8 @@ paths:
 
   /uploadApprovedScript:
     post:
-      summary: Upload an approved script.
+      summary: Upload an approved script file.
+      description: "Uploads an approved script file (.docx, .json, .md) for further processing."
       security:
         - OAuth2: []
       requestBody:
@@ -192,11 +288,12 @@ paths:
               $ref: "#/components/schemas/FileUploadRequest"
       responses:
         "201":
-          description: Approved script uploaded successfully.
+          description: "Approved script uploaded successfully."
 
   /youtubeInsights:
     get:
-      summary: Get insights on YouTube channel performance.
+      summary: Retrieve YouTube channel insights.
+      description: "Fetches a report on the performance of your YouTube channel, including top videos and engagement trends."
       security:
         - OAuth2: []
       parameters:
@@ -207,7 +304,7 @@ paths:
             type: string
       responses:
         "200":
-          description: YouTube analytics report.
+          description: "YouTube insights generated successfully."
           content:
             application/json:
               schema:

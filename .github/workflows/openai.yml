@@ -1,0 +1,214 @@
+openapi: 3.1.0
+info:
+  title: OML Article Writing Assistant API
+  description: |
+    The OML Writing Assistant is a GPT-powered application for structured article writing, fact-checking, 
+    multimedia adaptation, and YouTube content strategy analysis.
+  version: 2.0.0
+servers:
+  - url: https://api.openai.com/v1
+    description: OpenAI API base URL
+security:
+  - OAuth2: []
+
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.openai.com/v1/oauth/token
+          scopes:
+            write: "Allows writing content"
+            read: "Allows reading generated content"
+  
+  schemas:
+    ChapterRequest:
+      type: object
+      required: [chapterNumber, subject, wordCount]
+      properties:
+        chapterNumber:
+          type: integer
+          description: Chapter number (1 to 5).
+          enum: [1, 2, 3, 4, 5]
+        subject:
+          type: string
+          description: Name of the subject (e.g., Rockefeller Family).
+        wordCount:
+          type: integer
+          description: Word count for the chapter.
+          default: 495
+
+    ChapterResponse:
+      type: object
+      properties:
+        chapterContent:
+          type: string
+          description: The full content of the chapter.
+        nextSteps:
+          type: string
+          description: Suggested actions (e.g., "Fact-check this chapter").
+
+    FactCheckRequest:
+      type: object
+      required: [chapterContent]
+      properties:
+        chapterContent:
+          type: string
+          description: The chapter content to fact-check.
+
+    FactCheckResponse:
+      type: object
+      properties:
+        inaccuracies:
+          type: array
+          items:
+            type: object
+            properties:
+              claim:
+                type: string
+                description: The inaccurate statement.
+              correction:
+                type: string
+                description: Suggested correction.
+              source:
+                type: string
+                description: Verified source for the correction.
+        revisedChapter:
+          type: string
+          description: Revised chapter content with corrections.
+
+    MediaRequest:
+      type: object
+      required: [completeArticle, format]
+      properties:
+        completeArticle:
+          type: string
+          description: The complete 5-chapter OML article.
+        format:
+          type: string
+          enum: [mp3, wav, mp4, json]
+          description: "Desired output format."
+
+    MediaResponse:
+      type: object
+      properties:
+        audioVersion:
+          type: string
+          description: "Audio narration file (MP3 or WAV)."
+        videoVersion:
+          type: string
+          description: "Formatted video script."
+
+    FileUploadRequest:
+      type: object
+      required: [file]
+      properties:
+        file:
+          type: string
+          format: binary
+          description: "Upload an approved script file (.docx, .json, .md)."
+
+    YouTubeInsightsResponse:
+      type: object
+      properties:
+        bestPerformingVideos:
+          type: array
+          items:
+            type: string
+          description: "Top trending video titles."
+        engagementTrends:
+          type: string
+          description: "Summary of engagement analytics."
+
+paths:
+  /writeOMLArticle:
+    post:
+      summary: Generate an OML article chapter.
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChapterRequest"
+      responses:
+        "200":
+          description: Chapter successfully generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChapterResponse"
+
+  /factCheckChapter:
+    post:
+      summary: Fact-check an article chapter.
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FactCheckRequest"
+      responses:
+        "200":
+          description: Fact-check completed with verified sources.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactCheckResponse"
+
+  /generateMediaVersions:
+    post:
+      summary: Convert an article into audio and video formats.
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaRequest"
+      responses:
+        "200":
+          description: Media versions generated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaResponse"
+
+  /uploadApprovedScript:
+    post:
+      summary: Upload an approved script.
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/FileUploadRequest"
+      responses:
+        "201":
+          description: Approved script uploaded successfully.
+
+  /youtubeInsights:
+    get:
+      summary: Get insights on YouTube channel performance.
+      security:
+        - OAuth2: []
+      parameters:
+        - name: channelId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: YouTube analytics report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/YouTubeInsightsResponse"

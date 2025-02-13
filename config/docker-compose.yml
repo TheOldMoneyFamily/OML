@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: oml-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+
+  redis:
+    image: redis:latest
+    container_name: oml-redis
+    ports:
+      - "6379:6379"
+
+  db:
+    image: mysql:latest
+    container_name: oml-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: oml_db
+      MYSQL_USER: oml_user
+      MYSQL_PASSWORD: omlpassword
+    ports:
+      - "3306:3306"
